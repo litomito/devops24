@@ -1,0 +1,13 @@
+Ansible-begrepp
+
+- playbook
+- play
+- task
+module with paramater (FQCN!)
+
+- role
+- reusable set of tasks
+
+- collection
+- a group of playbooks, roles, and modules
+- FQCN (Fully Qualified Collection Name)
