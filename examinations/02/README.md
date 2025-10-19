@@ -19,7 +19,7 @@ In our examples below, we will call it `ansible`.
 
 In our dedicated Ansible directory, create a file called `ansible.cfg`
 (there is an example `ansible.cfg` in this same directory that you
- may copy).
+may copy).
 
 Put the following content (only two lines) into this file:
 
@@ -112,9 +112,13 @@ incompatibilities.
 
 What happens if you run `ansible-inventory --list` in the directory you created above?
 
+It displays all hosts and groups in JSON format, showing the inventory structure and variables (like IP, SSH key, and username) that Ansible uses to connect to each host.
+
 ## QUESTION B
 
 What happens if you run `ansible-inventory --graph` in the directory you created above?
+
+It prints the inventory as a text-based tree, showing how hosts are grouped, for example: `@db -> dbserver`, `@web -> webserver`.
 
 ## QUESTION C
 
@@ -131,6 +135,8 @@ Now run:
 Study the output of this command.
 
 What does the `ansible_connection=local` part mean?
+
+It tells Ansible to run tasks locally on the control machine instead of connecting through SSH.
 
 ## BONUS QUESTION
 
@@ -153,3 +159,5 @@ In your Ansible working directory where the `ansible.cfg' is, run
 You should get a pager displaying all available configuration values. How does it differ
 from when you run the same command in your usual home directory?
 
+In the Ansible directory, it shows configuration values from your local `ansible.cfg` (like `inventory = hosts`),
+while in your home directory, it shows only global or default Ansible settings.
