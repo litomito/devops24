@@ -47,15 +47,15 @@ The output should look something like this:
 
 In the output above, we can see in the `PLAY RECAP` what Ansible actually did.
 
-* `ok` indicates that the playbook performed a task without any changes
-* `changed` indicates the the playbook made a change on the machine
-* `unreachable` means that Ansible could not connect to a host for some reason
-* `failed` means that Ansible could connect, but failed to make a change
-* `skipped` means that a conditional task was not run
-* `rescued` means that a failure occurred, but but that there was a rescure procedure in place to
-   continue the play
-* `ignored` means that a number of hosts where ignored by this play, because they did not fulfill
-   some criteria
+- `ok` indicates that the playbook performed a task without any changes
+- `changed` indicates the the playbook made a change on the machine
+- `unreachable` means that Ansible could not connect to a host for some reason
+- `failed` means that Ansible could connect, but failed to make a change
+- `skipped` means that a conditional task was not run
+- `rescued` means that a failure occurred, but but that there was a rescure procedure in place to
+  continue the play
+- `ignored` means that a number of hosts where ignored by this play, because they did not fulfill
+  some criteria
 
 Now, to actually make a change on the machine, we need to tell ansible to actually do something:
 
@@ -121,9 +121,13 @@ Run the exact same playbook again and study the output. What is the difference?
 
 What does the `ansible.builtin.debug` module actually do?
 
+It prints variables or custom massages to the console, mainly for debugging or showing information during playbook execution.
+
 ## QUESTION B
 
 What is the variable 'ansible_facts' and where does it come from?
+
+`ansible_facts` is a dictionary of systems information automatically collected from each host by the "Gathering Facts" task when a playbook starts.
 
 ## QUESTION C
 
@@ -134,18 +138,40 @@ How do we now remove the software we installed through the playbook above? Make 
 playbook remove the exact same software we previously installed. Call the created
 playbook `03-uninstall-software.yml`.
 
+We change the `state` from `present` to `absent` in the package task.
+Example (saved as `03-uninstall-software.yml`):
+
+    ---
+    - name: Uninstall previously installed software
+      hosts: all
+      tasks:
+        - name: Remove vim, bash-completion, and qemu-guest-agent
+          become: true
+          ansible.builtin.package:
+            name: vim,bash-completion,qemu-guest-agent
+            state: absent
+
 ## BONUS QUESTION
 
 What happens when you run `ansible-playbook` with different options?
 
 Explain what each of these options do:
-* --verbose, -vv, -vvv, -vvvv
-* --check
-* --syntax-check
+
+- --verbose, -vv, -vvv, -vvvv
+- --check
+- --syntax-check
+
+**Option** **Description**
+--verbose or -v Shows more detailed output.
+-vv Displays task details and variable values.
+-vvv Adds connection and execution debugging info.
+-vvvv Maximum debug level, shows SSH and command details.
+--check Performs a dry run, shows what changes would be made without applying them.
+--syntax-check Checks the YAML syntax of the playbook without running it.
 
 ## Study Material & Documentation
 
-* https://docs.ansible.com/ansible/latest/playbook_guide/playbooks.html#working-with-playbooks
-* https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
-* https://docs.ansible.com/ansible/latest/collections/ansible/builtin/debug_module.html
-* https://docs.ansible.com/ansible/latest/collections/ansible/builtin/package_module.html
+- https://docs.ansible.com/ansible/latest/playbook_guide/playbooks.html#working-with-playbooks
+- https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
+- https://docs.ansible.com/ansible/latest/collections/ansible/builtin/debug_module.html
+- https://docs.ansible.com/ansible/latest/collections/ansible/builtin/package_module.html

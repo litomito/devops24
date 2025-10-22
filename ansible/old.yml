@@ -1,0 +1,7 @@
+---
+- name: Example Ansible palybook
+  hosts: all
+  tasks:
+    - name: Output hostname
+      ansible.builtin.debug:
+        var: ansible_facts.nodename
