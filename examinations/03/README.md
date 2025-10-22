@@ -161,13 +161,13 @@ Explain what each of these options do:
 - --check
 - --syntax-check
 
-**Option** **Description**
---verbose or -v Shows more detailed output.
--vv Displays task details and variable values.
--vvv Adds connection and execution debugging info.
--vvvv Maximum debug level, shows SSH and command details.
---check Performs a dry run, shows what changes would be made without applying them.
---syntax-check Checks the YAML syntax of the playbook without running it.
+      **Option**             **Description**
+      --verbose or -v        Shows more detailed output.
+      -vv                    Displays task details and variable values.
+      -vvv                   Adds connection and execution debugging info.
+      -vvvv                  Maximum debug level, shows SSH and command details.
+      --check                Performs a dry run, shows what changes would be made without applying them.
+      --syntax-check         Checks the YAML syntax of the playbook without running it.
 
 ## Study Material & Documentation
 
