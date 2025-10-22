@@ -53,12 +53,19 @@ module.
 
 How can we make the web server start with an addition of just one line to the playbook above?
 
+    ansible.builtin.service:
+      name: nginx
+      enabled: true
+      state: started   # ← by adding this line
+
 # QUESTION B
 
 You make have noted that the `become: true` statement has moved from a specific task to the beginning
 of the playbook, and is on the same indentation level as `tasks:`.
 
 What does this accomplish?
+
+Putting `become: true` at play level makes all tasks in that play run with privilege escalation, so you don’t have to repeat `become: true` on each task.
 
 # QUESTION C
 
@@ -72,8 +79,39 @@ log in to the machine and make sure that there are no `nginx` processes running.
 
 Why did we change the order of the tasks in the `04-uninstall-webserver.yml` playbook?
 
+Example `04-uninstall-webserver.yml` (note the order):
+
+    ---
+    - name: Uninstall webserver
+      hosts: web
+      become: true
+      tasks:
+        - name: Stop and disable nginx
+          ansible.builtin.service:
+            name: nginx
+            state: stopped
+            enabled: false
+
+        - name: Ensure nginx is absent
+          ansible.builtin.package:
+            name: nginx
+            state: absent
+
+**Why this order?**
+Stopping/disabling first ensures the service isn’t left running and prevents failures when trying to disable a unit that gets removed with the package. Then removing the package cleans it up safely.
+
 # BONUS QUESTION
 
 Consider the output from the tasks above, and what we were actually doing on the machine.
 
 What is a good naming convention for tasks? (What SHOULD we write in the `name:` field`?)
+
+Use clear, imperative, desired-state names that say what the task ensures, not how it does it. Include the resource and state, e.g.:
+
+- “Install nginx”
+
+- “Enable and start nginx (systemd)”
+
+- “Stop and disable nginx”
+
+- “Remove nginx package”
