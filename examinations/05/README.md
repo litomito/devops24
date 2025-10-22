@@ -76,6 +76,30 @@ What does the output look like the first time you run this playbook?
 
 What does the output look like the second time you run this playbook?
 
+Playbook `05-web.yml`:
+
+    ---
+    - name: Deploy HTTPS config to webserver
+      hosts: web
+      become: true
+      tasks:
+        - name: Copy https.conf to nginx configuration directory
+          ansible.builtin.copy:
+            src: files/https.conf
+            dest: /etc/nginx/conf.d/https.conf
+            owner: root
+            group: root
+            mode: '0644'
+
+**What happens the first time you run it:**
+
+Ansible copies the file, restarts nginx, and the output shows `"changed": true`.
+It also displays detailed JSON-like information about what was copied and which changes were made.
+
+**What happens the second time:**
+Ansible detects that the file is already identical, so no changes are made.
+The output shows `"changed": false` and nginx is not restarted.
+
 # QUESTION B
 
 Even if we have copied the configuration to the right place, we still do not have a working https service
@@ -114,12 +138,39 @@ Again, these addresses are just examples, make sure you use the IP of the actual
 Note also that `curl` needs the `--insecure` option to establish a connection to a HTTPS server with
 a self signed certificate.
 
+We can restart nginx through Ansible by adding this task:
+
+    - name: Restart nginx to apply configuration
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
+
+This makes Ansible automatically run the equivalent of:
+
+    sudo systemctl restart nginx
+
+after the configuration file has been copied.
+
+After that, you can verify it works:
+
+    curl http://<webserver-ip>
+    curl --insecure https://<webserver-ip>
+
 # QUESTION C
 
 What is the disadvantage of having a task that _always_ makes sure a service is restarted, even if there is
 no configuration change?
 
+If a service is always restarted regardless of changes, it can cause unnecessary downtime, temporary connection loss, and possibly interrupt running sessions even though nothing was updated.
+
 # BONUS QUESTION
 
 There are at least two _other_ modules, in addition to the `ansible.builtin.service` module that can restart
 a `systemd` service with Ansible. Which modules are they?
+
+Two other modules that can restart systemd services in Ansible are:
+
+- `Ansible.builtin.systemd`, gives more detailed control (like daemon_reload, enabled, etc.)
+- `community.general.systemd`, part of the community collection with extended features.
+
+You could also use `ansible.builtin.command` or `ansible.builtin.shell` with `systemctl restart nginx`, but that’s not best practice.
