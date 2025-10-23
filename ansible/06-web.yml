@@ -23,7 +23,7 @@
         owner: root
         group: root
         mode: "0755"
-        recurse: yes
+        recurse: true
         setype: httpd_sys_content_t
 
     - name: Upload index.html to example.internal
