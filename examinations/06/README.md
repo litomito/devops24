@@ -45,7 +45,7 @@ See if you now can resolve the name `example.internal`:
     $ ping -c 1 example.internal
     PING example.internal (192.168.121.10) 56(84) bytes of data.
     64 bytes from example.internal (192.168.121.10): icmp_seq=1 ttl=64 time=0.446 ms
-    
+
     --- example.internal ping statistics ---
     1 packets transmitted, 1 received, 0% packet loss, time 0ms
     rtt min/avg/max/mdev = 0.446/0.446/0.446/0.000 ms
@@ -75,6 +75,7 @@ Make a web page that looks something like this:
   </body>
 </html>
 ```
+
 Note that this web page follows the HTML standards from W3C, in case you are
 interested in why it looks the ways it does: https://html.spec.whatwg.org/multipage/
 
@@ -109,15 +110,36 @@ You may now rerun the example playbook and see what happens.
 
 In the `06-web.yml` playbook, add a couple of tasks:
 
-* One task to create the directory structure under `/var/www/example.internal/html/`.
-* One task to upload our `files/index.html` file to `/var/www/example.internal/html/index.html`.
+- One task to create the directory structure under `/var/www/example.internal/html/`.
+- One task to upload our `files/index.html` file to `/var/www/example.internal/html/index.html`.
 
 HINTS:
-* The module for creating a directory is, somewhat counterintuitively, called
-[ansible.builtin.file](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/file_module.html)
-* If you want to serve files under a non-standard directory (such as the one we create above), we must
+
+- The module for creating a directory is, somewhat counterintuitively, called
+  [ansible.builtin.file](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/file_module.html)
+- If you want to serve files under a non-standard directory (such as the one we create above), we must
   also set the correct SELinux security context type on the directory and files. The context in question
   in this case should be `httpd_sys_content_t` for the `/var/www/example.internal/html/` directory.
+
+      - name: Create directory structure for example.internal
+        ansible.builtin.file:
+          path: /var/www/example.internal/html
+          state: directory
+          owner: root
+          group: root
+          mode: "0755"
+          recurse: yes
+          setype: httpd_sys_content_t
+
+      - name: Upload index.html to example.internal
+        ansible.builtin.copy:
+          src: files/index.html
+          dest: /var/www/example.internal/html/index.html
+          owner: root
+          group: root
+          mode: "0644"
+          setype: httpd_sys_content_t
+        register: index_file
 
 # QUESTION B
 
@@ -167,6 +189,15 @@ There are several ways to accomplish this, and there is no _best_ way to do this
 
 Is this a good way to handle these types of conditionals? What do you think?
 
+You can add `register: index_file` to the task that upload `index.html`, and use a conditional to reload nginx **only if the files changes**
+
+    when: index_file.changed
+
+This avoids unnecessary reloads.
+
+**Is it a good way?**
+Yes, it works well for small setups, but for larger projects it's better to use handlers so multiple changes trigger one reload
+
 # BONUS QUESTION
 
 Imagine you had a playbook with hundreds of tasks to be done on several hosts, and each one of these tasks
@@ -177,3 +208,12 @@ would you like the flow to work?
 
 Describe in simple terms what your preferred task flow would look like, not necessarily implemented in
 Ansible, but in general terms.
+
+In large environments, the best flow is:
+
+1. Stage all configuration changes.
+2. Validate configurations.
+3. Restart or reload services **only once** after all updates.
+4. Use rolling or canary updates to reduce downtime.
+
+This minimizes interruptions and ensures stability.
