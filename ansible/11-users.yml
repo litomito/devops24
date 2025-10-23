@@ -1,0 +1,28 @@
+---
+- name: Add multiple users and groups
+  hosts: web
+  become: true
+
+  vars_files:
+    - group_vars/web/vault.yml
+
+  vars:
+    users:
+      - {
+          name: "alovelace",
+          realname: "Ada Lovelace",
+          groups: [wheel, audio, video],
+        }
+      - { name: "ghopper", realname: "Grace Hopper", groups: [wheel, audio] }
+      - { name: "aturing", realname: "Alan Turing", groups: [tape] }
+      - { name: "edijkstra", realname: "Edsger W. Dijkstra", groups: [tcpdump] }
+
+  tasks:
+    - name: Ensure users with groups, vaulted password hashes and GECOS
+      ansible.builtin.user:
+        name: "{{ item.name }}"
+        comment: "{{ item.realname }}"
+        groups: "{{ item.groups | join(',') }}"
+        state: present
+        password: "{{ vault_passwords[item.name] }}"
+      loop: "{{ users }}"
