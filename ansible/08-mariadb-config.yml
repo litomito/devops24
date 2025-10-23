@@ -29,11 +29,14 @@
         name: webappdb
         state: present
         login_unix_socket: /var/lib/mysql/mysql.sock
+        check_implicit_admin: true
 
     - name: Create user webappdb with privileges
       community.mysql.mysql_user:
         name: webappuser
         password: secretpassword
+        host: "%"
         priv: "*.*:ALL"
         state: present
         login_unix_socket: /var/lib/mysql/mysql.sock
+        check_implicit_admin: true
