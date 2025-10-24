@@ -21,18 +21,6 @@
         owner: root
         group: root
         mode: "0644"
-    - name: Reload nginx to apply changes
-      ansible.builtin.service:
-        name: nginx
-        state: reloaded
-
-    - name: Copy https.conf to nginx configuration directory
-      ansible.builtin.copy:
-        src: files/https.conf
-        dest: /etc/nginx/conf.d/https.conf
-        owner: root
-        group: root
-        mode: "0644"
 
     - name: Ensure the nginx configuration is updated for example.internal
       ansible.builtin.copy:
@@ -57,21 +45,8 @@
         group: root
         mode: "0644"
         setype: httpd_sys_content_t
-      register: index_file
+      notify: Reload nginx
 
-    - name: Reload nginx to apply changes
-      ansible.builtin.service:
-        name: nginx
-        state: reloaded
-      when: index_file.changed
-
-    - name: Copy https.conf to nginx configuration directory
-      ansible.builtin.copy:
-        src: files/https.conf
-        dest: /etc/nginx/conf.d/https.conf
-        owner: root
-        group: root
-        mode: "0644"
 
     - name: Show IP-adress
       ansible.builtin.debug:
@@ -84,32 +59,6 @@
         owner: root
         group: root
         mode: "0755"
-
-    - name: Create directory structure for example.internal
-      ansible.builtin.file:
-        path: /var/www/example.internal/html
-        state: directory
-        owner: root
-        group: root
-        mode: "0755"
-        recurse: true
-        setype: httpd_sys_content_t
-
-    - name: Upload index.html to example.internal
-      ansible.builtin.copy:
-        src: files/index.html
-        dest: /var/www/example.internal/html/index.html
-        owner: root
-        group: root
-        mode: "0644"
-        setype: httpd_sys_content_t
-      register: index_file
-
-    - name: Reload nginx to apply changes
-      ansible.builtin.service:
-        name: nginx
-        state: reloaded
-      when: index_file.changed
 
     - name: Create several users
       ansible.builtin.user:
