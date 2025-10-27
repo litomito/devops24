@@ -1,0 +1,92 @@
+---
+- name: Security Compliance Checks (simple, no changes)
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Gather package facts
+      ansible.builtin.package_facts:
+
+    - name: Gather service facts
+      ansible.builtin.service_facts:
+
+    - name: Assert AlmaLinux 10
+      ansible.builtin.assert:
+        that:
+          - ansible_facts.distribution == "AlmaLinux"
+          - ansible_facts.distribution_major_version == "10"
+        success_msg: "OK: System is AlmaLinux 10."
+        fail_msg: "NOT OK: System is not AlmaLinux 10."
+
+    - name: Assert openssh-server installed
+      ansible.builtin.assert:
+        that: "'openssh-server' in ansible_facts.packages"
+        success_msg: "OK: openssh-server package is installed."
+        fail_msg: "NOT OK: openssh-server package is missing."
+
+    - name: Assert sshd service running
+      ansible.builtin.assert:
+        that:
+          - "'sshd.service' in ansible_facts.services"
+          - ansible_facts.services['sshd.service'].state == 'running'
+        success_msg: "OK: sshd service is running."
+        fail_msg: "NOT OK: sshd service is not running."
+
+    - name: Assert telnet-server NOT installed
+      ansible.builtin.assert:
+        that: "'telnet-server' not in ansible_facts.packages"
+        success_msg: "OK: telnet-server is not installed."
+        fail_msg: "NOT OK: telnet-server is installed."
+
+    - name: Assert rsh-server NOT installed
+      ansible.builtin.assert:
+        that: "'rsh-server' not in ansible_facts.packages"
+        success_msg: "OK: rsh-server is not installed."
+        fail_msg: "NOT OK: rsh-server is installed."
+
+    - name: Assert tftp-server NOT installed
+      ansible.builtin.assert:
+        that: "'tftp-server' not in ansible_facts.packages"
+        success_msg: "OK: tftp-server is not installed."
+        fail_msg: "NOT OK: tftp-server is installed."
+
+    - name: Assert vsftpd NOT installed
+      ansible.builtin.assert:
+        that: "'vsftpd' not in ansible_facts.packages"
+        success_msg: "OK: vsftpd is not installed."
+        fail_msg: "NOT OK: vsftpd is installed."
+
+    - name: Assert xinetd NOT installed
+      ansible.builtin.assert:
+        that: "'xinetd' not in ansible_facts.packages"
+        success_msg: "OK: xinetd is not installed."
+        fail_msg: "NOT OK: xinetd is installed."
+
+    - name: Stat /etc/passwd
+      ansible.builtin.stat:
+        path: /etc/passwd
+      register: st_passwd
+
+    - name: Assert /etc/passwd perms
+      ansible.builtin.assert:
+        that:
+          - st_passwd.stat.pw_name == 'root'
+          - st_passwd.stat.gr_name == 'root'
+          - (st_passwd.stat.mode | int(base=8)) == 0o644
+        success_msg: "OK: /etc/passwd is owned by root:root and has 0644 permissions."
+        fail_msg: "NOT OK: /etc/passwd ownership or permissions are incorrect."
+
+    - name: Stat /etc/shadow
+      ansible.builtin.stat:
+        path: /etc/shadow
+      register: st_shadow
+
+    - name: Assert /etc/shadow perms (allow 000, 0400, 0600)
+      ansible.builtin.assert:
+        that:
+          - st_shadow.stat.pw_name == 'root'
+          - st_shadow.stat.gr_name == 'root'
+          - (st_shadow.stat.mode | int(base=8)) in [0o000, 0o400, 0o600]
+        success_msg: "OK: /etc/shadow is owned by root:root and has restrictive permissions (000/0400/0600)."
+        fail_msg: "NOT OK: /etc/shadow ownership or permissions are incorrect."
