@@ -17,12 +17,12 @@ We will now write our own module, and run it through Ansible.
 Look at [Developing modules](https://docs.ansible.com/ansible/latest/dev_guide/developing_modules_general.html)
 and create a module that
 
-* Is called `anagrammer`
-* Takes one parameter, `message`, that is a string.
-* Returns two values:
-    - `original_message` that is the string that is passed through `message`
-    - `reversed_message` that is the `message` string, only backwards (reversed).
-* If the `original_message` and `reversed_message` is different, the `changed` parameter should be `True`, otherwise
+- Is called `anagrammer`
+- Takes one parameter, `message`, that is a string.
+- Returns two values:
+  - `original_message` that is the string that is passed through `message`
+  - `reversed_message` that is the `message` string, only backwards (reversed).
+- If the `original_message` and `reversed_message` is different, the `changed` parameter should be `True`, otherwise
   it should be `False`.
 
 When you are done, you should be able to do
@@ -83,3 +83,15 @@ you most often use in Ansible?
 
 What modules/filters are there in Ansible that can safely test for "truthy/falsy" values, and return something
 more stringent?
+
+In Python, booleans follow strict `True` and `False` values.
+
+In Ansibke, many values are treated as truthy or falsy, such as `"yes"`, `"no"`, `"on"`, `"off"`, `"1"`, `"0"`.
+
+To safely evaluate truthy/falsy values, you can use filters like:
+
+- `|bool` (to convert safely to a boolean)
+
+- `is truthy` / `is falsy` (Jinja tests)
+
+These make condition checks more reliable in playbooks.

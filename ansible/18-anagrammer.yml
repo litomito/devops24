@@ -1,0 +1,26 @@
+---
+- name: Use my own module
+  hosts: localhost
+  tasks:
+    - name: Test if module works
+      anagrammer:
+        message: "{{ item }}"
+      loop:
+        - "Hello"
+        - "sirap i paris"
+        - "fail me"
+      register: msg
+
+    - name: Test default override
+      anagrammer:
+        message: "{{ message | default(omit) }}"
+
+      register: output
+
+    - name: output module result
+      ansible.builtin.debug:
+        var: msg
+
+    - name: output module default override
+      ansible.builtin.debug:
+        var: output
